@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox alignment="CENTER" spacing="10" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mybankingapp.controller.DepositController">
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+    <Label text="თანხის შეტანა" style="-fx-font-size: 24px; -fx-font-weight: bold;" />
+    <TextField fx:id="amountField" promptText="თანხა" />
+    <Button fx:id="handleSubmitButton" onAction="#handleSubmitButton" text="შეტანა" />
+    <Button fx:id="handleBackToHome" onAction="#handleBackToHome" text="მთავარ გვერდზე დაბრუნება" />
+    <Label fx:id="statusLabel" textFill="RED" />
+</VBox>
