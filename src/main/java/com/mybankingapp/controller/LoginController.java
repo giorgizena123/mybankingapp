@@ -1,22 +1,33 @@
 package com.mybankingapp.controller;
+
 import com.mybankingapp.MainApp;
 import com.mybankingapp.dao.UserDao;
 import com.mybankingapp.model.User;
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
+import javafx.scene.control.Alert;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Hyperlink;
 
-import java.io.IOException;
 import java.sql.SQLException;
 
 public class LoginController {
 
-    @FXML private TextField usernameField;
-    @FXML private PasswordField passwordField;
-    @FXML private Label statusLabel;
+    @FXML
+    private TextField usernameField;
 
-    private UserDao userDao = new UserDao();
+    @FXML
+    private PasswordField passwordField;
+
+    @FXML
+    private Hyperlink registerLink;
+
+    private MainApp mainApp;
+
+
+    public void setMainApp(MainApp mainApp) {
+        this.mainApp = mainApp;
+    }
 
     @FXML
     private void handleLoginButton() {
@@ -24,34 +35,45 @@ public class LoginController {
         String password = passwordField.getText();
 
         if (username.isEmpty() || password.isEmpty()) {
-            statusLabel.setText("გთხოვთ, შეავსოთ ყველა ველი.");
+            showAlert(Alert.AlertType.WARNING, "Login Error", "Please enter both username and password.");
             return;
         }
 
+        UserDao userDao = new UserDao();
         try {
-            User user = userDao.findByUsername(username);
-            if (user != null && user.getPassword().equals(password)) {
-                statusLabel.setText("წარმატებული ავტორიზაცია!");
-                MainApp.showHomePage(user);
+            User user = userDao.findByUsernameAndPassword(username, password);
+
+            if (user != null) {
+
+                showAlert(Alert.AlertType.INFORMATION, "Login Successful", "Welcome, " + user.getFirstName() + "!");
+                if (mainApp != null) {
+                    mainApp.showHomePage(user);
+                }
             } else {
-                statusLabel.setText("მომხმარებელი ან პაროლი არასწორია.");
+
+                showAlert(Alert.AlertType.ERROR, "Login Failed", "Invalid username or password.");
             }
         } catch (SQLException e) {
-            statusLabel.setText("მონაცემთა ბაზის შეცდომა: " + e.getMessage());
-            e.printStackTrace();
-        } catch (IOException e) {
-            statusLabel.setText("აპლიკაციის შეცდომა: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, "Database Error", "An error occurred while trying to log in: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
+
     @FXML
     private void handleRegisterLink() {
-        try {
-            MainApp.showRegisterScene();
-        } catch (IOException e) {
-            statusLabel.setText("აპლიკაციის შეცდომა: " + e.getMessage());
-            e.printStackTrace();
+        if (mainApp != null) {
+            mainApp.showRegisterScene();
+        } else {
+            System.err.println("MainApp is null. Cannot show register scene.");
         }
+    }
+
+    private void showAlert(Alert.AlertType type, String title, String message) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }
