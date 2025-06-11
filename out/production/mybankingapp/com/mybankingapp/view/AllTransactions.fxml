@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox alignment="TOP_CENTER" prefHeight="600.0" prefWidth="800.0" spacing="20.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mybankingapp.controller.AllTransactionsController">
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+    <Label text="ყველა ტრანზაქცია">
+        <font>
+            <Font name="System Bold" size="28.0" />
+        </font>
+    </Label>
+    <TableView fx:id="allTransactionsTable" prefHeight="400.0" prefWidth="760.0">
+        <columns>
+            <TableColumn fx:id="transactionIdColumn" text="ID" prefWidth="50.0" />
+            <TableColumn fx:id="fromUserColumn" text="გამგზავნი" prefWidth="120.0" />
+            <TableColumn fx:id="toUserColumn" text="მიმღები" prefWidth="120.0" />
+            <TableColumn fx:id="amountColumn" text="თანხა" prefWidth="100.0" />
+            <TableColumn fx:id="typeColumn" text="ტიპი" prefWidth="100.0" />
+            <TableColumn fx:id="dateColumn" text="თარიღი" prefWidth="170.0" />
+        </columns>
+    </TableView>
+    <Button onAction="#handleBackButton" text="უკან" prefWidth="100.0" />
+</VBox>
