@@ -40,7 +40,7 @@ public class TransferController implements Initializable {
         userDao = new UserDao();
         transactionDao = new TransactionDao();
         transactionTypeDao = new TransactionTypeDao();
-        messageLabel.setText(""); // Clear message label on init
+        messageLabel.setText("");
     }
 
 
@@ -86,7 +86,7 @@ public class TransferController implements Initializable {
         }
 
 
-        // შეამოწმეთ საკმარისი თანხა მონაცემთა ბაზაში ოპერაციამდე
+
         if (currentUser.getMoney().compareTo(amountBigDecimal) < 0) {
             messageLabel.setText("არასაკმარისი თანხა.");
             return;
@@ -104,15 +104,15 @@ public class TransferController implements Initializable {
                 return;
             }
 
-            // თანხის გამოკლება მიმდინარე მომხმარებლისგან
+
             currentUser.setMoney(currentUser.getMoney().subtract(amountBigDecimal));
             userDao.update(currentUser);
 
-            // თანხის დამატება მიმღებს
+
             receiver.setMoney(receiver.getMoney().add(amountBigDecimal));
             userDao.update(receiver);
 
-            // ტრანზაქციის ჩაწერა
+
             TransactionType transferType = transactionTypeDao.getTypeByName("transfer");
             if (transferType == null) {
                 throw new SQLException("ტრანზაქციის ტიპი 'transfer' ვერ მოიძებნა მონაცემთა ბაზაში. გთხოვთ დარწმუნდით, რომ 'types' ცხრილი შევსებულია.");
@@ -124,10 +124,9 @@ public class TransferController implements Initializable {
             messageLabel.setText("გადარიცხვა წარმატებით დასრულდა!");
             showAlert(Alert.AlertType.INFORMATION, "წარმატება", "გადარიცხვა წარმატებით დასრულდა!");
 
-            // მიმდინარე მომხმარებლის მონაცემების განახლება წარმატებული გადარიცხვის შემდეგ
             User updatedCurrentUser = userDao.findByUsername(currentUser.getUsername());
             if (mainApp != null && updatedCurrentUser != null) {
-                mainApp.showHomePage(updatedCurrentUser); // მთავარ გვერდზე დაბრუნება განახლებული ბალანსით
+                mainApp.showHomePage(updatedCurrentUser);
             }
 
         } catch (SQLException e) {

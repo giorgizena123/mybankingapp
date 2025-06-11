@@ -17,7 +17,7 @@ import javafx.scene.control.TextField;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.SQLException;
-import java.time.LocalDateTime; // Make sure this is imported
+import java.time.LocalDateTime;
 import java.util.ResourceBundle;
 
 public class WithdrawController implements Initializable {
@@ -38,7 +38,7 @@ public class WithdrawController implements Initializable {
         userDao = new UserDao();
         transactionDao = new TransactionDao();
         transactionTypeDao = new TransactionTypeDao();
-        messageLabel.setText(""); // Clear message label on init
+        messageLabel.setText("");
     }
 
     public void setMainApp(MainApp mainApp) {
@@ -50,7 +50,7 @@ public class WithdrawController implements Initializable {
     }
 
     @FXML
-    private void handleWithdrawButton(ActionEvent event) { // Correct method name
+    private void handleWithdrawButton(ActionEvent event) {
         BigDecimal amountBigDecimal;
 
         if (amountField.getText().isEmpty()) {
@@ -75,32 +75,32 @@ public class WithdrawController implements Initializable {
             return;
         }
 
-        // შეამოწმეთ საკმარისი თანხა მონაცემთა ბაზაში ოპერაციამდე
+
         if (currentUser.getMoney().compareTo(amountBigDecimal) < 0) {
             messageLabel.setText("არასაკმარისი თანხა.");
             return;
         }
 
         try {
-            // მომხმარებლის ბალანსის განახლება მონაცემთა ბაზაში
+
             currentUser.setMoney(currentUser.getMoney().subtract(amountBigDecimal));
-            boolean success = userDao.update(currentUser); // Call userDao.update()
+            boolean success = userDao.update(currentUser);
 
             if (success) {
-                // ტრანზაქციის ჩაწერა
+
                 TransactionType withdrawType = transactionTypeDao.getTypeByName("withdraw");
                 if (withdrawType == null) {
                     throw new SQLException("ტრანზაქციის ტიპი 'withdraw' ვერ მოიძებნა მონაცემთა ბაზაში. გთხოვთ დარწმუნდით, რომ 'types' ცხრილი შევსებულია.");
                 }
-                // გამოტანისას 'toUser' null-ია (თანხა გადის სისტემიდან)
+
                 Transaction withdrawTransaction = new Transaction(currentUser, null, amountBigDecimal, withdrawType);
                 transactionDao.recordTransaction(withdrawTransaction);
 
                 messageLabel.setText("თანხის გამოტანა წარმატებით დასრულდა!");
                 showAlert(Alert.AlertType.INFORMATION, "წარმატება", "თანხა წარმატებით გამოვიდა!");
 
-                // მომხმარებლის მონაცემების განახლება და მთავარ გვერდზე დაბრუნება
-                User updatedUser = userDao.findByUsername(currentUser.getUsername()); // Fetch updated user details
+
+                User updatedUser = userDao.findByUsername(currentUser.getUsername());
                 if (mainApp != null && updatedUser != null) {
                     mainApp.showHomePage(updatedUser);
                 }

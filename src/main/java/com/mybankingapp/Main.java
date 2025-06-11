@@ -20,12 +20,11 @@ public class Main {
         try {
             System.out.println("--- 1. მომხმარებლების რეგისტრაცია ---");
 
-            // Corrected User constructor usage for registration
-            // IBAN and initial money (BigDecimal.ZERO) are handled by registerUser
+
             User user1 = new User("giorgi_m", "pass123", "გიორგი", "მეტონიძე");
-            boolean registered1 = userDao.registerUser(user1); // Correct method: registerUser
+            boolean registered1 = userDao.registerUser(user1);
             if (registered1) {
-                // user1 object will now have its ID and generated IBAN populated
+
                 System.out.println("შექმნილი მომხმარებელი 1: " + user1.getUsername() + " (IBAN: " + user1.getIban() + ", Money: " + user1.getMoney() + ")");
             } else {
                 System.out.println("მომხმარებელი 'giorgi_m' რეგისტრაცია ვერ მოხერხდა (შესაძლოა უკვე არსებობს).");
@@ -47,9 +46,7 @@ public class Main {
                 System.out.println("მომხმარებელი 'lasha_b' რეგისტრაცია ვერ მოხერხდა (შესაძლოა უკვე არსებობს).");
             }
 
-            // Fetch users from DB to get their current state including ID and generated IBAN/initial money
-            // This is important because the User objects passed to registerUser might not have money/iban immediately
-            // or if the users already existed from a previous run.
+
             User giorgi = userDao.findByUsername("giorgi_m");
             User ana = userDao.findByUsername("ana_l");
             User lasha = userDao.findByUsername("lasha_b");
@@ -63,8 +60,8 @@ public class Main {
             }
 
             System.out.println("\n--- 3. მომხმარებლის მოძებნა IBAN-ით ---");
-            if (ana != null && ana.getIban() != null) { // Use 'ana' user to get its IBAN, assuming it was successfully registered
-                User foundUserByIBAN = userDao.findByIBAN(ana.getIban()); // Correct method: findByIBAN
+            if (ana != null && ana.getIban() != null) {
+                User foundUserByIBAN = userDao.findByIBAN(ana.getIban());
                 if (foundUserByIBAN != null) {
                     System.out.println("მომხმარებელი (IBAN-ით): " + foundUserByIBAN.getFirstName() + " " + foundUserByIBAN.getLastName() + ", ბალანსი: " + foundUserByIBAN.getMoney() + ", IBAN: " + foundUserByIBAN.getIban());
                 } else {
@@ -76,7 +73,7 @@ public class Main {
 
 
             System.out.println("\n--- 4. ყველა მომხმარებელი ---");
-            List<User> allUsers = userDao.findAllUsers(); // Correct method: findAllUsers
+            List<User> allUsers = userDao.findAllUsers();
             if (allUsers != null && !allUsers.isEmpty()) {
                 allUsers.forEach(u -> System.out.println("ID: " + u.getId() + ", Username: " + u.getUsername() + ", Name: " + u.getFirstName() + " " + u.getLastName() + ", Money: " + u.getMoney() + ", IBAN: " + u.getIban()));
             } else {
@@ -85,9 +82,9 @@ public class Main {
 
 
             System.out.println("\n--- 5. ტრანზაქციების შექმნა ---");
-            // Corrected method call: getTypeByName
+
             TransactionType depositType = transactionTypeDao.getTypeByName("deposit");
-            TransactionType withdrawType = transactionTypeDao.getTypeByName("withdraw"); // Note: "withdraw" not "withdrawal" in SQL
+            TransactionType withdrawType = transactionTypeDao.getTypeByName("withdraw");
             TransactionType transferType = transactionTypeDao.getTypeByName("transfer");
 
             if (depositType == null || withdrawType == null || transferType == null) {
@@ -95,21 +92,21 @@ public class Main {
                 return;
             }
 
-            // Ensure users are not null before proceeding with transactions
+
             if (giorgi == null || ana == null || lasha == null) {
                 System.err.println("Error: One or more users could not be fetched from the database. Cannot perform transactions.");
                 return;
             }
 
             System.out.println("\n--- დეპოზიტი (გიორგის) ---");
-            // For deposit, fromUser is null
+
             Transaction depositTx = new Transaction(null, giorgi, new BigDecimal("100.00"), depositType);
-            boolean depositSuccess = transactionDao.recordTransaction(depositTx); // Correct method: recordTransaction
+            boolean depositSuccess = transactionDao.recordTransaction(depositTx);
             if (depositSuccess) {
                 System.out.println("შექმნილი ტრანზაქცია (დეპოზიტი ID: " + depositTx.getId() + ", Amount: " + depositTx.getAmount() + ")");
                 giorgi.setMoney(giorgi.getMoney().add(depositTx.getAmount()));
-                userDao.update(giorgi); // Update user balance in DB
-                giorgi = userDao.findByUsername("giorgi_m"); // Fetch updated user object to ensure local object is synced
+                userDao.update(giorgi);
+                giorgi = userDao.findByUsername("giorgi_m");
                 System.out.println("გიორგის ბალანსი დეპოზიტის შემდეგ: " + giorgi.getMoney());
             } else {
                 System.out.println("დეპოზიტი ვერ მოხერხდა.");
@@ -119,16 +116,15 @@ public class Main {
             BigDecimal transferAmount = new BigDecimal("150.00");
             if (giorgi.getMoney().compareTo(transferAmount) >= 0) {
                 Transaction transferTx = new Transaction(giorgi, ana, transferAmount, transferType);
-                boolean transferSuccess = transactionDao.recordTransaction(transferTx); // Correct method: recordTransaction
+                boolean transferSuccess = transactionDao.recordTransaction(transferTx);
                 if (transferSuccess) {
                     System.out.println("შექმნილი ტრანზაქცია (გადარიცხვა ID: " + transferTx.getId() + ", Amount: " + transferTx.getAmount() + ")");
                     giorgi.setMoney(giorgi.getMoney().subtract(transferAmount));
-                    userDao.update(giorgi); // Update sender balance
+                    userDao.update(giorgi);
 
                     ana.setMoney(ana.getMoney().add(transferAmount));
-                    userDao.update(ana); // Update receiver balance
-
-                    giorgi = userDao.findByUsername("giorgi_m"); // Fetch updated user objects
+                    userDao.update(ana);
+                    giorgi = userDao.findByUsername("giorgi_m");
                     ana = userDao.findByUsername("ana_l");
                     System.out.println("გიორგის ბალანსი გადარიცხვის შემდეგ: " + giorgi.getMoney());
                     System.out.println("ანას ბალანსი გადარიცხვის შემდეგ: " + ana.getMoney());
@@ -142,14 +138,14 @@ public class Main {
             System.out.println("\n--- განაღდება (ანას) ---");
             BigDecimal withdrawAmount = new BigDecimal("50.00");
             if (ana.getMoney().compareTo(withdrawAmount) >= 0) {
-                // For withdraw, toUser is null
+
                 Transaction withdrawTx = new Transaction(ana, null, withdrawAmount, withdrawType);
-                boolean withdrawSuccess = transactionDao.recordTransaction(withdrawTx); // Correct method: recordTransaction
+                boolean withdrawSuccess = transactionDao.recordTransaction(withdrawTx);
                 if (withdrawSuccess) {
                     System.out.println("შექმნილი ტრანზაქცია (განაღდება ID: " + withdrawTx.getId() + ", Amount: " + withdrawTx.getAmount() + ")");
                     ana.setMoney(ana.getMoney().subtract(withdrawAmount));
-                    userDao.update(ana); // Update user balance
-                    ana = userDao.findByUsername("ana_l"); // Fetch updated user object
+                    userDao.update(ana);
+                    ana = userDao.findByUsername("ana_l");
                     System.out.println("ანას ბალანსი განაღდების შემდეგ: " + ana.getMoney());
                 } else {
                     System.out.println("განაღდება ვერ მოხერხდა.");
@@ -160,7 +156,7 @@ public class Main {
 
 
             System.out.println("\n--- 6. ტრანზაქციები მომხმარებლისთვის (გიორგის) ---");
-            // Corrected method call: getTransactionsForUser
+
             List<Transaction> giorgiTransactions = transactionDao.getTransactionsForUser(giorgi.getUsername());
             if (giorgiTransactions.isEmpty()) {
                 System.out.println("გიორგისთვის ტრანზაქციები ვერ მოიძებნა.");

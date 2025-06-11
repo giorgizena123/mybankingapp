@@ -26,35 +26,30 @@ public class TransactionDao {
         this.transactionTypeDao = new TransactionTypeDao();
     }
 
-    /**
-     * Records a new transaction in the database.
-     * @param transaction The Transaction object to record.
-     * @return true if the transaction was successfully recorded, false otherwise.
-     * @throws SQLException if a database access error occurs.
-     */
+
     public boolean recordTransaction(Transaction transaction) throws SQLException {
         String sql = "INSERT INTO transactions (from_user_username, to_user_username, amount, type_id, date) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseConnectionManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            // Set sender username (can be null for deposit/withdraw)
+
             if (transaction.getFromUser() != null) {
                 stmt.setString(1, transaction.getFromUser().getUsername());
             } else {
-                stmt.setNull(1, java.sql.Types.VARCHAR); // Set as SQL NULL if no sender
+                stmt.setNull(1, java.sql.Types.VARCHAR);
             }
 
-            // --- CRUCIAL FIX HERE: Handle null toUser for withdrawals/deposits ---
+
             if (transaction.getToUser() != null) {
-                stmt.setString(2, transaction.getToUser().getUsername()); // Recipient username
+                stmt.setString(2, transaction.getToUser().getUsername());
             } else {
-                stmt.setNull(2, java.sql.Types.VARCHAR); // Set as SQL NULL if no recipient
+                stmt.setNull(2, java.sql.Types.VARCHAR);
             }
-            // --- END OF CRUCIAL FIX ---
 
-            stmt.setBigDecimal(3, transaction.getAmount()); // Transaction amount
-            stmt.setLong(4, transaction.getType().getId()); // Transaction type ID
-            stmt.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now())); // Current timestamp for the transaction date
+
+            stmt.setBigDecimal(3, transaction.getAmount());
+            stmt.setLong(4, transaction.getType().getId());
+            stmt.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now()));
 
             int rowsAffected = stmt.executeUpdate();
 
@@ -70,13 +65,7 @@ public class TransactionDao {
         return false;
     }
 
-    /**
-     * Retrieves a list of all transactions for a given user (either as sender or receiver).
-     * Transactions are ordered by date in descending order.
-     * @param username The username of the user for whom to retrieve transactions.
-     * @return A list of Transaction objects.
-     * @throws SQLException if a database access error occurs.
-     */
+
     public List<Transaction> getTransactionsForUser(String username) throws SQLException {
         List<Transaction> transactions = new ArrayList<>();
         String sql = "SELECT id, from_user_username, to_user_username, amount, date, type_id FROM transactions " +
@@ -84,8 +73,8 @@ public class TransactionDao {
 
         try (Connection conn = DatabaseConnectionManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, username); // For transactions where user is sender
-            stmt.setString(2, username); // For transactions where user is receiver
+            stmt.setString(1, username);
+            stmt.setString(2, username);
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
@@ -96,7 +85,7 @@ public class TransactionDao {
                 LocalDateTime date = rs.getTimestamp("date").toLocalDateTime();
                 Long typeId = rs.getLong("type_id");
 
-                // Fetch User and TransactionType objects based on retrieved IDs/names
+
                 User fromUser = (fromUsername != null) ? userDao.findByUsername(fromUsername) : null;
                 User toUser = (toUsername != null) ? userDao.findByUsername(toUsername) : null;
                 TransactionType type = transactionTypeDao.getTypeById(typeId);
@@ -107,14 +96,7 @@ public class TransactionDao {
         return transactions;
     }
 
-    /**
-     * Retrieves the latest N transactions for a given user (either as sender or receiver).
-     * Transactions are ordered by date in descending order.
-     * @param username The username of the user for whom to retrieve transactions.
-     * @param limit The maximum number of transactions to retrieve.
-     * @return A list of Transaction objects.
-     * @throws SQLException if a database access error occurs.
-     */
+
     public List<Transaction> getLatestTransactionsForUser(String username, int limit) throws SQLException {
         List<Transaction> transactions = new ArrayList<>();
         String sql = "SELECT id, from_user_username, to_user_username, amount, date, type_id FROM transactions " +
@@ -135,7 +117,7 @@ public class TransactionDao {
                 LocalDateTime date = rs.getTimestamp("date").toLocalDateTime();
                 Long typeId = rs.getLong("type_id");
 
-                // Fetch User and TransactionType objects based on retrieved IDs/names
+
                 User fromUser = (fromUsername != null) ? userDao.findByUsername(fromUsername) : null;
                 User toUser = (toUsername != null) ? userDao.findByUsername(toUsername) : null;
                 TransactionType type = transactionTypeDao.getTypeById(typeId);

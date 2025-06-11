@@ -37,7 +37,7 @@ public class DepositController implements Initializable {
         userDao = new UserDao();
         transactionDao = new TransactionDao();
         transactionTypeDao = new TransactionTypeDao();
-        messageLabel.setText(""); // Clear message label on init
+        messageLabel.setText("");
     }
 
     public void setMainApp(MainApp mainApp) {
@@ -75,23 +75,23 @@ public class DepositController implements Initializable {
         }
 
         try {
-            // Update user's money in the database
+
             currentUser.setMoney(currentUser.getMoney().add(amountBigDecimal));
             boolean success = userDao.update(currentUser);
 
             if (success) {
-                // Record transaction
+
                 TransactionType depositType = transactionTypeDao.getTypeByName("deposit");
                 if (depositType == null) {
                     throw new SQLException("ტრანზაქციის ტიპი 'deposit' ვერ მოიძებნა მონაცემთა ბაზაში. გთხოვთ დარწმუნდით, რომ 'types' ცხრილი შევსებულია.");
                 }
-                // For deposit, 'fromUser' is null as money comes from outside
+
                 Transaction depositTransaction = new Transaction(null, currentUser, amountBigDecimal, depositType);
                 transactionDao.recordTransaction(depositTransaction);
 
                 messageLabel.setText("თანხის შეტანა წარმატებით დასრულდა!");
                 showAlert(Alert.AlertType.INFORMATION, "წარმატება", "თანხა წარმატებით შევიდა!");
-                // Refresh user data and go back to home page
+
                 User updatedUser = userDao.findByUsername(currentUser.getUsername());
                 if (mainApp != null && updatedUser != null) {
                     mainApp.showHomePage(updatedUser);

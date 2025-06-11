@@ -30,7 +30,7 @@ public class HomePageController implements Initializable {
     @FXML
     private Label balanceLabel;
     @FXML
-    private Label ibanLabel; // This must match fx:id="ibanLabel" in FXML
+    private Label ibanLabel;
     @FXML
     private TableView<Transaction> transactionsTable;
     @FXML
@@ -57,14 +57,14 @@ public class HomePageController implements Initializable {
         userDao = new UserDao();
         transactionDao = new TransactionDao();
 
-        // Initialize TableView columns
-        transactionIdColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
-        fromUserColumn.setCellValueFactory(new PropertyValueFactory<>("fromUserUsername")); // Uses helper method in Transaction
-        toUserColumn.setCellValueFactory(new PropertyValueFactory<>("toUserUsername"));     // Uses helper method in Transaction
-        amountColumn.setCellValueFactory(new PropertyValueFactory<>("amount"));
-        typeColumn.setCellValueFactory(new PropertyValueFactory<>("typeName"));             // Uses helper method in Transaction
 
-        // Custom cell factory for date formatting
+        transactionIdColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
+        fromUserColumn.setCellValueFactory(new PropertyValueFactory<>("fromUserUsername"));
+        toUserColumn.setCellValueFactory(new PropertyValueFactory<>("toUserUsername"));
+        amountColumn.setCellValueFactory(new PropertyValueFactory<>("amount"));
+        typeColumn.setCellValueFactory(new PropertyValueFactory<>("typeName"));
+
+
         dateColumn.setCellValueFactory(new PropertyValueFactory<>("transactionDate"));
         dateColumn.setCellFactory(column -> new javafx.scene.control.TableCell<Transaction, LocalDateTime>() {
             private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -87,16 +87,15 @@ public class HomePageController implements Initializable {
 
     public void setUser(User user) {
         this.currentUser = user;
-        updateUserDetails(); // Call this to populate labels
+        updateUserDetails();
         loadLatestTransactions();
     }
 
     private void updateUserDetails() {
         if (currentUser != null) {
             welcomeLabel.setText("კეთილი იყოს თქვენი მობრძანება, " + currentUser.getFirstName() + "!");
-            // Ensuring BigDecimal is formatted for display
             balanceLabel.setText(currentUser.getMoney().setScale(2, BigDecimal.ROUND_HALF_UP).toPlainString() + " GEL");
-            ibanLabel.setText(currentUser.getIban()); // This line will now work
+            ibanLabel.setText(currentUser.getIban());
         }
     }
 
@@ -104,7 +103,7 @@ public class HomePageController implements Initializable {
         if (currentUser != null) {
             try {
                 ObservableList<Transaction> transactions = FXCollections.observableArrayList(
-                        transactionDao.getLatestTransactionsForUser(currentUser.getUsername(), 5) // Show latest 5 transactions
+                        transactionDao.getLatestTransactionsForUser(currentUser.getUsername(), 5)
                 );
                 transactionsTable.setItems(transactions);
             } catch (SQLException e) {
@@ -145,7 +144,7 @@ public class HomePageController implements Initializable {
     @FXML
     private void handleLogout(ActionEvent event) {
         if (mainApp != null) {
-            currentUser = null; // Clear current user on logout
+            currentUser = null;
             mainApp.showLoginScene();
         }
     }

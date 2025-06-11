@@ -1,6 +1,6 @@
 package com.mybankingapp.model;
 
-import java.math.BigDecimal; // <-- დაამატეთ ეს import
+import java.math.BigDecimal;
 
 public class User {
     private Long id;
@@ -9,20 +9,20 @@ public class User {
     private String firstName;
     private String lastName;
     private String iban;
-    private BigDecimal money; // <-- შეიცვალა double-დან BigDecimal-ზე
+    private BigDecimal money;
 
-    // კონსტრუქტორი რეგისტრაციისთვის
+
     public User(String username, String password, String firstName, String lastName) {
         this.username = username;
         this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
         this.iban = null;
-        this.money = BigDecimal.ZERO; // <-- შეიცვალა
+        this.money = BigDecimal.ZERO;
     }
 
-    // კონსტრუქტორი მონაცემთა ბაზიდან მომხმარებლის ჩამოსატვირთად
-    public User(Long id, String username, String password, String firstName, String lastName, String iban, BigDecimal money) { // <-- შეიცვალა double-დან BigDecimal-ზე
+
+    public User(Long id, String username, String password, String firstName, String lastName, String iban, BigDecimal money) {
         this.id = id;
         this.username = username;
         this.password = password;
@@ -32,7 +32,7 @@ public class User {
         this.money = money;
     }
 
-    // Getters and Setters
+
     public Long getId() {
         return id;
     }
@@ -81,11 +81,11 @@ public class User {
         this.iban = iban;
     }
 
-    public BigDecimal getMoney() { // <-- შეიცვალა double-დან BigDecimal-ზე
+    public BigDecimal getMoney() {
         return money;
     }
 
-    public void setMoney(BigDecimal money) { // <-- შეიცვალა double-დან BigDecimal-ზე
+    public void setMoney(BigDecimal money) {
         this.money = money;
     }
 }

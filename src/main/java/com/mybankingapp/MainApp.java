@@ -12,7 +12,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert; // Keep this for now, though custom modal is preferred
+import javafx.scene.control.Alert;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -27,7 +27,7 @@ public class MainApp extends Application {
     public void start(Stage primaryStage) {
         this.primaryStage = primaryStage;
         primaryStage.setTitle("My Banking App");
-        showLoginScene(); // Start with the login scene
+        showLoginScene();
     }
 
     public User getCurrentUser() {
@@ -40,7 +40,7 @@ public class MainApp extends Application {
 
     public void showLoginScene() {
         try {
-            // CORRECTED PATH: /com/mybankingapp/view/Login.fxml
+
             URL fxmlLocation = getClass().getResource("/com/mybankingapp/view/Login.fxml");
             if (fxmlLocation == null) {
                 System.err.println("Error: Login.fxml not found! Check the path: /com/mybankingapp/view/Login.fxml");
@@ -71,7 +71,7 @@ public class MainApp extends Application {
 
     public void showRegisterScene() {
         try {
-            // CORRECTED PATH: /com/mybankingapp/view/Register.fxml
+
             URL fxmlLocation = getClass().getResource("/com/mybankingapp/view/Register.fxml");
             if (fxmlLocation == null) {
                 System.err.println("Error: Register.fxml not found! Check the path: /com/mybankingapp/view/Register.fxml");
@@ -104,7 +104,7 @@ public class MainApp extends Application {
     public void showHomePage(User user) {
         this.currentUser = user;
         try {
-            // CORRECTED PATH: /com/mybankingapp/view/HomePage.fxml
+
             URL fxmlLocation = getClass().getResource("/com/mybankingapp/view/HomePage.fxml");
             if (fxmlLocation == null) {
                 System.err.println("Error: HomePage.fxml not found! Check the path: /com/mybankingapp/view/HomePage.fxml");
@@ -138,7 +138,7 @@ public class MainApp extends Application {
 
     public void showTransferScene(User user) {
         try {
-            // CORRECTED PATH: /com/mybankingapp/view/Transfer.fxml
+
             URL fxmlLocation = getClass().getResource("/com/mybankingapp/view/Transfer.fxml");
             if (fxmlLocation == null) {
                 System.err.println("Error: Transfer.fxml not found! Check the path: /com/mybankingapp/view/Transfer.fxml");
@@ -172,7 +172,7 @@ public class MainApp extends Application {
 
     public void showDepositScene(User user) {
         try {
-            // CORRECTED PATH: /com/mybankingapp/view/Deposit.fxml
+
             URL fxmlLocation = getClass().getResource("/com/mybankingapp/view/Deposit.fxml");
             if (fxmlLocation == null) {
                 System.err.println("Error: Deposit.fxml not found! Check the path: /com/mybankingapp/view/Deposit.fxml");
@@ -206,7 +206,7 @@ public class MainApp extends Application {
 
     public void showWithdrawScene(User user) {
         try {
-            // CORRECTED PATH: /com/mybankingapp/view/Withdraw.fxml
+
             URL fxmlLocation = getClass().getResource("/com/mybankingapp/view/Withdraw.fxml");
             if (fxmlLocation == null) {
                 System.err.println("Error: Withdraw.fxml not found! Check the path: /com/mybankingapp/view/Withdraw.fxml");
@@ -240,7 +240,7 @@ public class MainApp extends Application {
 
     public void showAllTransactionsScene(User user) {
         try {
-            // CORRECTED PATH: /com/mybankingapp/view/AllTransactions.fxml
+
             URL fxmlLocation = getClass().getResource("/com/mybankingapp/view/AllTransactions.fxml");
             if (fxmlLocation == null) {
                 System.err.println("Error: AllTransactions.fxml not found! Check the path: /com/mybankingapp/view/AllTransactions.fxml");

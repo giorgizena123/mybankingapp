@@ -22,7 +22,7 @@ public class LoginController implements Initializable {
     @FXML
     private PasswordField passwordField;
     @FXML
-    private Label statusLabel; // For displaying messages like "Login failed"
+    private Label statusLabel;
 
     private MainApp mainApp;
     private UserDao userDao;
@@ -30,7 +30,7 @@ public class LoginController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         userDao = new UserDao();
-        statusLabel.setText(""); // Clear status label on init
+        statusLabel.setText("");
     }
 
     public void setMainApp(MainApp mainApp) {
@@ -48,11 +48,11 @@ public class LoginController implements Initializable {
         }
 
         try {
-            // CORRECTED METHOD CALL: from findByUsernameAndPassword to authenticate
+
             User user = userDao.authenticate(username, password);
             if (user != null) {
                 showAlert(Alert.AlertType.INFORMATION, "წარმატება", "შესვლა წარმატებით დასრულდა!");
-                mainApp.showHomePage(user); // Pass the authenticated user to HomePage
+                mainApp.showHomePage(user);
             } else {
                 showAlert(Alert.AlertType.ERROR, "შესვლა ვერ მოხერხდა", "არასწორი მომხმარებლის სახელი ან პაროლი.");
             }

@@ -46,14 +46,14 @@ public class AllTransactionsController implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         transactionDao = new TransactionDao();
 
-        // Initialize TableView columns
+
         transactionIdColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         fromUserColumn.setCellValueFactory(new PropertyValueFactory<>("fromUserUsername"));
         toUserColumn.setCellValueFactory(new PropertyValueFactory<>("toUserUsername"));
         amountColumn.setCellValueFactory(new PropertyValueFactory<>("amount"));
         typeColumn.setCellValueFactory(new PropertyValueFactory<>("typeName"));
 
-        // Custom cell factory for date formatting
+
         dateColumn.setCellValueFactory(new PropertyValueFactory<>("transactionDate"));
         dateColumn.setCellFactory(column -> new javafx.scene.control.TableCell<Transaction, LocalDateTime>() {
             private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");

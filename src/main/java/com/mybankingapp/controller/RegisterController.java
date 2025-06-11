@@ -26,7 +26,7 @@ public class RegisterController implements Initializable {
     @FXML
     private TextField lastNameField;
     @FXML
-    private Label statusLabel; // For displaying messages
+    private Label statusLabel;
 
     private MainApp mainApp;
     private UserDao userDao;
@@ -34,7 +34,7 @@ public class RegisterController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         userDao = new UserDao();
-        statusLabel.setText(""); // Clear status label on init
+        statusLabel.setText("");
     }
 
     public void setMainApp(MainApp mainApp) {
@@ -42,7 +42,7 @@ public class RegisterController implements Initializable {
     }
 
     @FXML
-    private void handleRegister(ActionEvent event) { // Correct method name and signature
+    private void handleRegister(ActionEvent event) {
         String username = usernameField.getText();
         String password = passwordField.getText();
         String firstName = firstNameField.getText();

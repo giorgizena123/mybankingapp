@@ -1,26 +1,26 @@
 package com.mybankingapp.model;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime; // Import LocalDateTime
+import java.time.LocalDateTime;
 
 public class Transaction {
     private Long id;
-    private User fromUser; // User object representing the sender
-    private User toUser;   // User object representing the recipient
+    private User fromUser;
+    private User toUser;
     private BigDecimal amount;
     private LocalDateTime transactionDate;
     private TransactionType type;
 
-    // Constructor for creating a new transaction (e.g., in controllers before saving to DB)
+
     public Transaction(User fromUser, User toUser, BigDecimal amount, TransactionType type) {
         this.fromUser = fromUser;
         this.toUser = toUser;
         this.amount = amount;
         this.type = type;
-        this.transactionDate = LocalDateTime.now(); // Set current time by default
+        this.transactionDate = LocalDateTime.now();
     }
 
-    // Constructor for retrieving a transaction from the database
+
     public Transaction(Long id, User fromUser, User toUser, BigDecimal amount, LocalDateTime transactionDate, TransactionType type) {
         this.id = id;
         this.fromUser = fromUser;
@@ -30,7 +30,7 @@ public class Transaction {
         this.type = type;
     }
 
-    // Getters and Setters for all fields
+
     public Long getId() {
         return id;
     }
@@ -39,7 +39,7 @@ public class Transaction {
         this.id = id;
     }
 
-    public User getFromUser() { // This is the missing method!
+    public User getFromUser() {
         return fromUser;
     }
 
@@ -47,7 +47,7 @@ public class Transaction {
         this.fromUser = fromUser;
     }
 
-    public User getToUser() { // This is also needed
+    public User getToUser() {
         return toUser;
     }
 
@@ -55,7 +55,7 @@ public class Transaction {
         this.toUser = toUser;
     }
 
-    public BigDecimal getAmount() { // This is also needed
+    public BigDecimal getAmount() {
         return amount;
     }
 
@@ -63,7 +63,7 @@ public class Transaction {
         this.amount = amount;
     }
 
-    public LocalDateTime getTransactionDate() { // This is also needed
+    public LocalDateTime getTransactionDate() {
         return transactionDate;
     }
 
@@ -71,7 +71,7 @@ public class Transaction {
         this.transactionDate = transactionDate;
     }
 
-    public TransactionType getType() { // This is also needed
+    public TransactionType getType() {
         return type;
     }
 
@@ -79,7 +79,7 @@ public class Transaction {
         this.type = type;
     }
 
-    // Helper methods for TableView (assuming usernames are available)
+
     public String getFromUserUsername() {
         return fromUser != null ? fromUser.getUsername() : "N/A";
     }
@@ -92,7 +92,7 @@ public class Transaction {
         return type != null ? type.getName() : "N/A";
     }
 
-    // Override toString for easy debugging in Main.java
+
     @Override
     public String toString() {
         String fromUsername = (fromUser != null) ? fromUser.getUsername() : "N/A";
