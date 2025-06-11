@@ -1,22 +1,26 @@
 package com.mybankingapp.controller;
 
 import com.mybankingapp.MainApp;
-import com.mybankingapp.model.User;
-import com.mybankingapp.model.Transaction;
-import com.mybankingapp.dao.UserDao;
 import com.mybankingapp.dao.TransactionDao;
-
+import com.mybankingapp.dao.TransactionTypeDao;
+import com.mybankingapp.dao.UserDao;
+import com.mybankingapp.model.Transaction;
+import com.mybankingapp.model.TransactionType;
+import com.mybankingapp.model.User;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import java.sql.SQLException;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.sql.Timestamp;
 
-public class WithdrawController {
+import java.math.BigDecimal;
+import java.net.URL;
+import java.sql.SQLException;
+import java.time.LocalDateTime; // Make sure this is imported
+import java.util.ResourceBundle;
+
+public class WithdrawController implements Initializable {
 
     @FXML
     private TextField amountField;
@@ -27,11 +31,14 @@ public class WithdrawController {
     private User currentUser;
     private UserDao userDao;
     private TransactionDao transactionDao;
+    private TransactionTypeDao transactionTypeDao;
 
-    @FXML
-    public void initialize() {
+    @Override
+    public void initialize(URL url, ResourceBundle rb) {
         userDao = new UserDao();
         transactionDao = new TransactionDao();
+        transactionTypeDao = new TransactionTypeDao();
+        messageLabel.setText(""); // Clear message label on init
     }
 
     public void setMainApp(MainApp mainApp) {
@@ -43,63 +50,67 @@ public class WithdrawController {
     }
 
     @FXML
-    private void handleWithdrawButton(ActionEvent event) {
-        BigDecimal withdrawAmount;
+    private void handleWithdrawButton(ActionEvent event) { // Correct method name
+        BigDecimal amountBigDecimal;
 
         if (amountField.getText().isEmpty()) {
-            messageLabel.setText("Please enter an amount.");
+            messageLabel.setText("გთხოვთ შეიყვანოთ თანხა.");
             return;
         }
 
         try {
-            withdrawAmount = new BigDecimal(amountField.getText());
-            if (withdrawAmount.compareTo(BigDecimal.ZERO) <= 0) {
-                messageLabel.setText("Amount must be positive.");
+            amountBigDecimal = new BigDecimal(amountField.getText());
+
+            if (amountBigDecimal.compareTo(BigDecimal.ZERO) <= 0) {
+                messageLabel.setText("თანხა დადებითი უნდა იყოს.");
                 return;
             }
         } catch (NumberFormatException e) {
-            messageLabel.setText("Invalid amount. Please enter a number.");
+            messageLabel.setText("არასწორი თანხა. გთხოვთ შეიყვანოთ რიცხვი.");
             return;
         }
 
         if (currentUser == null) {
-            messageLabel.setText("No active user found for withdrawal.");
+            messageLabel.setText("მომხმარებელი ვერ მოიძებნა.");
             return;
         }
 
-
-        if (currentUser.getMoney().compareTo(withdrawAmount) < 0) {
-            messageLabel.setText("Insufficient funds.");
+        // შეამოწმეთ საკმარისი თანხა მონაცემთა ბაზაში ოპერაციამდე
+        if (currentUser.getMoney().compareTo(amountBigDecimal) < 0) {
+            messageLabel.setText("არასაკმარისი თანხა.");
             return;
         }
 
         try {
+            // მომხმარებლის ბალანსის განახლება მონაცემთა ბაზაში
+            currentUser.setMoney(currentUser.getMoney().subtract(amountBigDecimal));
+            boolean success = userDao.update(currentUser); // Call userDao.update()
 
-            currentUser.setMoney(currentUser.getMoney().subtract(withdrawAmount));
-            userDao.update(currentUser);
+            if (success) {
+                // ტრანზაქციის ჩაწერა
+                TransactionType withdrawType = transactionTypeDao.getTypeByName("withdraw");
+                if (withdrawType == null) {
+                    throw new SQLException("ტრანზაქციის ტიპი 'withdraw' ვერ მოიძებნა მონაცემთა ბაზაში. გთხოვთ დარწმუნდით, რომ 'types' ცხრილი შევსებულია.");
+                }
+                // გამოტანისას 'toUser' null-ია (თანხა გადის სისტემიდან)
+                Transaction withdrawTransaction = new Transaction(currentUser, null, amountBigDecimal, withdrawType);
+                transactionDao.recordTransaction(withdrawTransaction);
 
-            Transaction newTransaction = new Transaction(
-                    0,
-                    currentUser.getUsername(),
-                    currentUser.getUsername(),
-                    withdrawAmount,
-                    "WITHDRAW",
-                    LocalDateTime.now()
-            );
-            transactionDao.create(newTransaction);
+                messageLabel.setText("თანხის გამოტანა წარმატებით დასრულდა!");
+                showAlert(Alert.AlertType.INFORMATION, "წარმატება", "თანხა წარმატებით გამოვიდა!");
 
-            messageLabel.setText("Withdrawal successful!");
-            showAlert(Alert.AlertType.INFORMATION, "Success", "Withdrawal successful! Your balance has been updated.");
-
-
-            User updatedCurrentUser = userDao.findByUsername(currentUser.getUsername());
-            if (mainApp != null && updatedCurrentUser != null) {
-                mainApp.showHomePage(updatedCurrentUser);
+                // მომხმარებლის მონაცემების განახლება და მთავარ გვერდზე დაბრუნება
+                User updatedUser = userDao.findByUsername(currentUser.getUsername()); // Fetch updated user details
+                if (mainApp != null && updatedUser != null) {
+                    mainApp.showHomePage(updatedUser);
+                }
+            } else {
+                messageLabel.setText("თანხის გამოტანა ვერ მოხერხდა. სცადეთ ხელახლა.");
             }
-
         } catch (SQLException e) {
-            messageLabel.setText("Database error during withdrawal: " + e.getMessage());
+            messageLabel.setText("მონაცემთა ბაზის შეცდომა თანხის გამოტანისას: " + e.getMessage());
             e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "ბაზის შეცდომა", "შეცდომა მონაცემთა ბაზასთან: " + e.getMessage());
         }
     }
 
@@ -116,12 +127,5 @@ public class WithdrawController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
-    }
-
-    public void handleSubmitButton(ActionEvent actionEvent) {
-    }
-
-    public void handleBackToHome(ActionEvent actionEvent) {
-
     }
 }

@@ -1,101 +1,83 @@
 package com.mybankingapp.controller;
-import java.math.BigDecimal;
+
 import com.mybankingapp.MainApp;
-import com.mybankingapp.model.User;
 import com.mybankingapp.dao.UserDao;
+import com.mybankingapp.model.User;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+
+import java.net.URL;
 import java.sql.SQLException;
+import java.util.ResourceBundle;
 
-public class RegisterController {
+public class RegisterController implements Initializable {
 
-    @FXML
-    private TextField firstNameField;
-    @FXML
-    private TextField lastNameField;
     @FXML
     private TextField usernameField;
     @FXML
     private PasswordField passwordField;
     @FXML
-    private TextField ibanField;
+    private TextField firstNameField;
     @FXML
-    private TextField initialBalanceField;
+    private TextField lastNameField;
     @FXML
-    private Label messageLabel;
+    private Label statusLabel; // For displaying messages
 
     private MainApp mainApp;
     private UserDao userDao;
 
-    @FXML
-    public void initialize() {
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
         userDao = new UserDao();
-        initialBalanceField.setText("0.00");
+        statusLabel.setText(""); // Clear status label on init
     }
-
 
     public void setMainApp(MainApp mainApp) {
         this.mainApp = mainApp;
     }
 
     @FXML
-    private void handleRegisterButton(ActionEvent event) {
-        String firstName = firstNameField.getText();
-        String lastName = lastNameField.getText();
+    private void handleRegister(ActionEvent event) { // Correct method name and signature
         String username = usernameField.getText();
         String password = passwordField.getText();
-        String iban = ibanField.getText();
-        double initialBalance;
+        String firstName = firstNameField.getText();
+        String lastName = lastNameField.getText();
 
-
-        if (firstName.isEmpty() || lastName.isEmpty() || username.isEmpty() || password.isEmpty() || iban.isEmpty() || initialBalanceField.getText().isEmpty()) {
-            messageLabel.setText("Please fill in all fields.");
+        if (username.isEmpty() || password.isEmpty() || firstName.isEmpty() || lastName.isEmpty()) {
+            showAlert(Alert.AlertType.ERROR, "შეცდომა", "გთხოვთ შეავსოთ ყველა ველი.");
             return;
         }
 
         try {
-            initialBalance = Double.parseDouble(initialBalanceField.getText());
-        } catch (NumberFormatException e) {
-            messageLabel.setText("Invalid initial balance. Please enter a number.");
-            return;
-        }
+            if (userDao.isUsernameTaken(username)) {
+                showAlert(Alert.AlertType.ERROR, "რეგისტრაციის შეცდომა", "ეს მომხმარებლის სახელი დაკავებულია.");
+                return;
+            }
 
-        try {
-
-            User newUser = new User(0, firstName, lastName, username, password, iban, BigDecimal.valueOf(initialBalance));
-            userDao.create(newUser);
-            messageLabel.setText("Registration successful!");
-            showAlert(Alert.AlertType.INFORMATION, "Success", "Registration successful! You can now log in.");
-
-
-            if (mainApp != null) {
+            User newUser = new User(username, password, firstName, lastName);
+            if (userDao.registerUser(newUser)) {
+                showAlert(Alert.AlertType.INFORMATION, "წარმატება", "რეგისტრაცია წარმატებით დასრულდა! თქვენი IBAN: " + newUser.getIban());
                 mainApp.showLoginScene();
-            }
-
-        } catch (SQLException e) {
-            if (e.getMessage().contains("users_username_key")) {
-                messageLabel.setText("Username already exists. Please choose a different one.");
-            } else if (e.getMessage().contains("users_iban_key")) {
-                messageLabel.setText("IBAN already exists. Please use a different one.");
             } else {
-                messageLabel.setText("Database error during registration: " + e.getMessage());
+                showAlert(Alert.AlertType.ERROR, "რეგისტრაციის შეცდომა", "მომხმარებლის რეგისტრაცია ვერ მოხერხდა.");
             }
+        } catch (SQLException e) {
             e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "ბაზის შეცდომა", "მონაცემთა ბაზასთან დაკავშირების შეცდომა: " + e.getMessage());
         }
     }
 
-
     @FXML
-    private void handleBackButton(ActionEvent event) {
+    private void handleLoginLink(ActionEvent event) {
         if (mainApp != null) {
             mainApp.showLoginScene();
         }
     }
-
 
     private void showAlert(Alert.AlertType type, String title, String message) {
         Alert alert = new Alert(type);
@@ -103,9 +85,5 @@ public class RegisterController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
-    }
-
-    public void handleLoginLink(ActionEvent actionEvent) {
-
     }
 }

@@ -1,34 +1,36 @@
 package com.mybankingapp.controller;
-import java.math.BigDecimal;
+
 import com.mybankingapp.MainApp;
-import com.mybankingapp.model.User;
-import com.mybankingapp.model.Transaction;
 import com.mybankingapp.dao.TransactionDao;
+import com.mybankingapp.model.Transaction;
+import com.mybankingapp.model.User;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
+import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 
+import java.math.BigDecimal;
+import java.net.URL;
 import java.sql.SQLException;
-import java.util.List;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ResourceBundle;
 
-public class AllTransactionsController {
+public class AllTransactionsController implements Initializable {
 
     @FXML
-    private Label messageLabel;
+    private TableView<Transaction> allTransactionsTable;
     @FXML
-    private TableView<Transaction> transactionsTable;
+    private TableColumn<Transaction, Long> transactionIdColumn;
     @FXML
-    private TableColumn<Transaction, Integer> idColumn;
+    private TableColumn<Transaction, String> fromUserColumn;
     @FXML
-    private TableColumn<Transaction, String> fromColumn;
-    @FXML
-    private TableColumn<Transaction, String> toColumn;
+    private TableColumn<Transaction, String> toUserColumn;
     @FXML
     private TableColumn<Transaction, BigDecimal> amountColumn;
     @FXML
@@ -40,54 +42,56 @@ public class AllTransactionsController {
     private User currentUser;
     private TransactionDao transactionDao;
 
-
-    @FXML
-    public void initialize() {
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
         transactionDao = new TransactionDao();
 
-
-        idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
-        fromColumn.setCellValueFactory(new PropertyValueFactory<>("fromUserUsername"));
-        toColumn.setCellValueFactory(new PropertyValueFactory<>("toUserUsername"));
+        // Initialize TableView columns
+        transactionIdColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
+        fromUserColumn.setCellValueFactory(new PropertyValueFactory<>("fromUserUsername"));
+        toUserColumn.setCellValueFactory(new PropertyValueFactory<>("toUserUsername"));
         amountColumn.setCellValueFactory(new PropertyValueFactory<>("amount"));
-        typeColumn.setCellValueFactory(new PropertyValueFactory<>("type"));
+        typeColumn.setCellValueFactory(new PropertyValueFactory<>("typeName"));
+
+        // Custom cell factory for date formatting
         dateColumn.setCellValueFactory(new PropertyValueFactory<>("transactionDate"));
+        dateColumn.setCellFactory(column -> new javafx.scene.control.TableCell<Transaction, LocalDateTime>() {
+            private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
+            @Override
+            protected void updateItem(LocalDateTime item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(formatter.format(item));
+                }
+            }
+        });
     }
-
 
     public void setMainApp(MainApp mainApp) {
         this.mainApp = mainApp;
     }
 
-
     public void setUser(User user) {
         this.currentUser = user;
+        loadAllTransactions();
+    }
+
+    private void loadAllTransactions() {
         if (currentUser != null) {
-            loadTransactions();
-        }
-    }
-
-
-    private void loadTransactions() {
-        try {
-
-            List<Transaction> transactions = transactionDao.getTransactionsByUser(currentUser.getUsername());
-            ObservableList<Transaction> observableTransactions = FXCollections.observableArrayList(transactions);
-            transactionsTable.setItems(observableTransactions);
-
-            if (transactions.isEmpty()) {
-                messageLabel.setText("No transactions found for this account.");
-            } else {
-                messageLabel.setText("");
+            try {
+                ObservableList<Transaction> transactions = FXCollections.observableArrayList(
+                        transactionDao.getTransactionsForUser(currentUser.getUsername())
+                );
+                allTransactionsTable.setItems(transactions);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                showAlert(Alert.AlertType.ERROR, "შეცდომა", "ვერ მოხერხდა ტრანზაქციების ჩატვირთვა: " + e.getMessage());
             }
-
-        } catch (SQLException e) {
-            messageLabel.setText("Error loading transactions: " + e.getMessage());
-            e.printStackTrace();
         }
     }
-
 
     @FXML
     private void handleBackButton(ActionEvent event) {
@@ -96,7 +100,11 @@ public class AllTransactionsController {
         }
     }
 
-    public void handleBackToHome(ActionEvent actionEvent) {
-
+    private void showAlert(Alert.AlertType type, String title, String message) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }
